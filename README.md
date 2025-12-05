@@ -30,7 +30,9 @@
 
 http://localhost:5173
 
+account: admin
 
+password: admin
 
 # How to import data
 
