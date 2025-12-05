@@ -1,0 +1,22 @@
+services:
+  # Vite 前端应用服务
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cenjin_web
+    restart: always
+    ports:
+      - "5173:5173"  # Vite 默认端口
+    environment:
+      NODE_ENV: development
+    volumes:
+      - .:/app                    # 挂载代码目录，实现热更新
+      - /app/node_modules         # 保护 node_modules，使用镜像内的版本
+    command: npm run dev -- --host 0.0.0.0
+    networks:
+      - cenjin_network
+
+networks:
+  cenjin_network:
+    driver: bridge

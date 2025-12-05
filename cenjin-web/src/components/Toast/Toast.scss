@@ -1,0 +1,125 @@
+.toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-size: 14px;
+  z-index: 9999;
+  min-width: 300px;
+  max-width: 500px;
+  animation: toast-slide-in 0.3s ease-out;
+  
+  .toast-icon {
+    font-size: 18px;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+  
+  .toast-message {
+    flex: 1;
+    word-break: break-word;
+  }
+
+  // Success 样式
+  &.toast-success {
+    background: #f0f9ff;
+    border: 1px solid #91d5ff;
+    color: #0958d9;
+    
+    .toast-icon {
+      color: #52c41a;
+      background: #f6ffed;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  // Error 样式
+  &.toast-error {
+    background: #fff2f0;
+    border: 1px solid #ffccc7;
+    color: #cf1322;
+    
+    .toast-icon {
+      color: #ff4d4f;
+      background: #fff1f0;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  // Warning 样式
+  &.toast-warning {
+    background: #fffbe6;
+    border: 1px solid #ffe58f;
+    color: #d48806;
+    
+    .toast-icon {
+      color: #faad14;
+      background: #fffbf0;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  // Info 样式
+  &.toast-info {
+    background: #f0f5ff;
+    border: 1px solid #adc6ff;
+    color: #0958d9;
+    
+    .toast-icon {
+      color: #1890ff;
+      background: #e6f7ff;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  // 淡出动画
+  &.toast-fade-out {
+    animation: toast-fade-out 0.5s ease-out forwards;
+  }
+}
+
+// 滑入动画
+@keyframes toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+// 淡出并上移动画
+@keyframes toast-fade-out {
+  to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-30px);
+  }
+}
