@@ -6,6 +6,8 @@ const path = require('path');
 const fs = require('fs');
 const memberCardService = require('../../services/memberCard/memberCard.service');
 const { authMiddleware } = require('../../middlewares/auth.middleware');
+const MemberCard = require('../../models/MemberCard');
+const { sequelize } = require('../../config/database');
 
 // 配置文件上传
 const storage = multer.diskStorage({

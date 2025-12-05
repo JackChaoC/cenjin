@@ -379,14 +379,14 @@ const MemberCard = () => {
               <label>日期</label>
               <div className="date-inputs">
                 <input 
-                  type="text" 
+                  type="date" 
                   placeholder="开始日期"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
                 />
                 <span className="separator">至</span>
                 <input 
-                  type="text" 
+                  type="date" 
                   placeholder="结束日期"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}

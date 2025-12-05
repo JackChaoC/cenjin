@@ -142,10 +142,12 @@ class MemberCardService {
       if (startDate || endDate) {
         where.orderTime = {};
         if (startDate) {
-          where.orderTime[Op.gte] = new Date(startDate);
+          // 开始日期：从当天 00:00:00 开始
+          where.orderTime[Op.gte] = new Date(startDate + ' 00:00:00');
         }
         if (endDate) {
-          where.orderTime[Op.lte] = new Date(endDate);
+          // 结束日期：到当天 23:59:59 结束
+          where.orderTime[Op.lte] = new Date(endDate + ' 23:59:59');
         }
       }
 

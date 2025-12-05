@@ -80,9 +80,14 @@ const Home = () => {
   const loadRankData = async () => {
     try {
       setRankLoading(true);
+      console.log('开始加载排行榜数据...');
       const response = await getRankData();
+      console.log('排行榜 API 响应:', response);
       if (response.success) {
+        console.log('排行榜数据:', response.data);
         setRankData(response.data || []);
+      } else {
+        console.error('排行榜 API 返回失败:', response);
       }
     } catch (error) {
       console.error('加载排行数据失败:', error);
