@@ -108,6 +108,13 @@ const Home = () => {
 
   return (
     <div className="home-dashboard">
+      {/* Background Image */}
+      <img 
+        className="background-image" 
+        src="https://www.pphd.fun/screen/img/head.png" 
+        alt="background"
+      />
+      
       {/* Breadcrumb */}
       <div className="breadcrumb">
         <span className="breadcrumb-item active">首页</span>
@@ -115,9 +122,7 @@ const Home = () => {
 
       {/* Title */}
       <div className="dashboard-title">
-        <div className="title-decoration left"></div>
         <h1>数据分析驾驶舱</h1>
-        <div className="title-decoration right"></div>
         <button className="fullscreen-btn">⛶</button>
       </div>
 

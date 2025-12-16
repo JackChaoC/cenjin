@@ -2,6 +2,24 @@
   background: #0a0e27;
   min-height: 100vh;
   color: #fff;
+  position: relative;
+  
+  .background-image {
+    position: fixed;
+    top: 60px; // 考虑 header 的高度
+    left: 200px; // 考虑 sidebar 的宽度
+    width: calc(100% - 200px);
+    height: auto;
+    object-fit: contain;
+    z-index: 0;
+    opacity: 1;
+  }
+  
+  // 确保所有内容在视频之上
+  > * {
+    position: relative;
+    z-index: 1;
+  }
   
   .breadcrumb {
     display: flex;
@@ -48,41 +66,6 @@
     margin: 0 20px;
     color: #00d9ff;
     text-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
-  }
-
-  .title-decoration {
-    width: 100px;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, #00d9ff, transparent);
-    position: relative;
-
-    &.left {
-      background: linear-gradient(90deg, transparent, #00d9ff);
-    }
-
-    &.right {
-      background: linear-gradient(90deg, #00d9ff, transparent);
-    }
-
-    &::before {
-      content: '';
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      background: #00d9ff;
-      border-radius: 50%;
-      top: 50%;
-      transform: translateY(-50%);
-      box-shadow: 0 0 8px #00d9ff;
-    }
-
-    &.left::before {
-      right: 0;
-    }
-
-    &.right::before {
-      left: 0;
-    }
   }
 
   .fullscreen-btn {
