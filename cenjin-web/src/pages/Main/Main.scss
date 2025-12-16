@@ -234,4 +234,22 @@
   flex: 1;
   overflow-y: auto;
   background: #f4f4f4;
+  
+  // 自定义滚动条样式
+  &::-webkit-scrollbar {
+    width: 6px; // 很细的滚动条
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent; // 透明背景
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: rgba(128, 128, 128, 0.5); // 半透明灰色
+    border-radius: 3px;
+    
+    &:hover {
+      background: rgba(128, 128, 128, 0.7); // 悬停时更明显
+    }
+  }
 }

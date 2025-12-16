@@ -1,8 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import * as echarts from 'echarts';
 import { getMemberCardStats, getChartData, getRankData } from '../../../api/memberCard';
 import './Home.scss';
 
 const Home = () => {
+  const chartRef = useRef(null);
+  const chartInstanceRef = useRef(null);
+  const cumulativeChartRef = useRef(null);
+  const cumulativeChartInstanceRef = useRef(null);
+  
   const [stats, setStats] = useState({
     // 月度数据
     currentMonthCount: 0,
@@ -18,9 +24,15 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   
   // 图表数据状态
-  const [chartTimeRange, setChartTimeRange] = useState('month'); // week | month | year
+  const [chartTimeRange, setChartTimeRange] = useState('week'); // week | year
   const [chartData, setChartData] = useState([]);
   const [chartLoading, setChartLoading] = useState(true);
+  const [orderData, setOrderData] = useState(null); // 存储订单数据
+  
+  // 第二个图表数据状态
+  const [cumulativeTimeRange, setCumulativeTimeRange] = useState('week'); // week | year
+  const [cumulativeData, setCumulativeData] = useState([]);
+  const [cumulativeLoading, setCumulativeLoading] = useState(true);
 
   // 排行榜数据状态
   const [rankData, setRankData] = useState([]);
@@ -29,14 +41,331 @@ const Home = () => {
   // 加载统计数据
   useEffect(() => {
     loadStats();
-    loadChartData(chartTimeRange);
+    loadOrderData();
     loadRankData();
   }, []);
 
+  // 加载订单数据
+  const loadOrderData = async () => {
+    try {
+      const response = await fetch('/OrderData/index.json');
+      const data = await response.json();
+      setOrderData(data);
+      console.log('Order data loaded:', data);
+    } catch (error) {
+      console.error('加载订单数据失败:', error);
+    }
+  };
+
   // 当图表时间范围变化时重新加载数据
   useEffect(() => {
-    loadChartData(chartTimeRange);
-  }, [chartTimeRange]);
+    if (orderData) {
+      updateChartData();
+    }
+  }, [chartTimeRange, orderData]);
+
+  // 当累积图表时间范围变化时重新加载数据
+  useEffect(() => {
+    if (orderData) {
+      updateCumulativeData();
+    }
+  }, [cumulativeTimeRange, orderData]);
+
+  // 更新图表数据
+  const updateChartData = async () => {
+    if (!orderData) return;
+
+    setChartLoading(true);
+    try {
+      if (chartTimeRange === 'week') {
+        // 获取最近7天的数据（从11月最后7天）
+        const response = await fetch('/OrderData/2025-11.json');
+        const monthData = await response.json();
+        const last7Days = monthData.dailyData.slice(-7);
+        setChartData(last7Days.map(item => ({
+          label: item.date,
+          value: item.amount
+        })));
+      } else {
+        // year: 显示所有月份数据
+        setChartData(orderData.months.map(item => ({
+          label: item.month.split('-')[1] + '月',
+          value: item.total
+        })));
+      }
+    } catch (error) {
+      console.error('更新图表数据失败:', error);
+    } finally {
+      setChartLoading(false);
+    }
+  };
+
+  // 更新累积图表数据
+  const updateCumulativeData = async () => {
+    if (!orderData) return;
+
+    setCumulativeLoading(true);
+    try {
+      if (cumulativeTimeRange === 'week') {
+        // 获取最近7天的数据并计算累积
+        const response = await fetch('/OrderData/2025-11.json');
+        const monthData = await response.json();
+        const last7Days = monthData.dailyData.slice(-7);
+        
+        let cumulative = 0;
+        const cumulativeArray = last7Days.map(item => {
+          cumulative += item.amount;
+          return {
+            label: item.date,
+            value: cumulative
+          };
+        });
+        setCumulativeData(cumulativeArray);
+      } else {
+        // year: 显示所有月份累积数据
+        let cumulative = 0;
+        const cumulativeArray = orderData.months.map(item => {
+          cumulative += item.total;
+          return {
+            label: item.month.split('-')[1] + '月',
+            value: cumulative
+          };
+        });
+        setCumulativeData(cumulativeArray);
+      }
+    } catch (error) {
+      console.error('更新累积图表数据失败:', error);
+    } finally {
+      setCumulativeLoading(false);
+    }
+  };
+
+  // 初始化和更新 ECharts
+  useEffect(() => {
+    if (!chartRef.current || chartData.length === 0) {
+      console.log('chartRef.current is null or no data');
+      return;
+    }
+
+    // 初始化图表实例
+    if (!chartInstanceRef.current) {
+      console.log('Initializing ECharts instance');
+      chartInstanceRef.current = echarts.init(chartRef.current);
+    }
+
+    // 准备数据
+    const labels = chartData.map(item => item.label);
+    const values = chartData.map(item => item.value);
+    
+    console.log('Chart data:', { labels, values, timeRange: chartTimeRange });
+
+    // 配置选项
+    const option = {
+      backgroundColor: 'transparent',
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '15%',
+        top: '10%',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'category',
+        data: labels,
+        axisLine: {
+          lineStyle: {
+            color: 'rgba(0, 217, 255, 0.3)'
+          }
+        },
+        axisLabel: {
+          color: 'rgba(255, 255, 255, 0.7)',
+          fontSize: 11
+        }
+      },
+      yAxis: {
+        type: 'value',
+        axisLine: {
+          show: false
+        },
+        axisTick: {
+          show: false
+        },
+        axisLabel: {
+          color: 'rgba(255, 255, 255, 0.5)',
+          fontSize: 11
+        },
+        splitLine: {
+          lineStyle: {
+            color: 'rgba(0, 217, 255, 0.1)'
+          }
+        }
+      },
+      series: [
+        {
+          data: values,
+          type: 'bar',
+          barWidth: '50%',
+          itemStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: '#00d9ff' },
+              { offset: 1, color: '#0088ff' }
+            ]),
+            borderRadius: [4, 4, 0, 0],
+            shadowColor: 'rgba(0, 217, 255, 0.3)',
+            shadowBlur: 10
+          },
+          emphasis: {
+            itemStyle: {
+              shadowColor: 'rgba(0, 217, 255, 0.6)',
+              shadowBlur: 20
+            }
+          },
+          label: {
+            show: true,
+            position: 'top',
+            color: '#ffffff',
+            fontSize: 11,
+            fontWeight: 500
+          }
+        }
+      ]
+    };
+
+    chartInstanceRef.current.setOption(option, true);
+    console.log('Chart option set successfully');
+
+    // 响应式处理
+    const handleResize = () => {
+      chartInstanceRef.current?.resize();
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [chartData, chartTimeRange]);
+
+  // 清理图表实例
+  useEffect(() => {
+    return () => {
+      chartInstanceRef.current?.dispose();
+      cumulativeChartInstanceRef.current?.dispose();
+    };
+  }, []);
+
+  // 初始化和更新累积折线图
+  useEffect(() => {
+    if (!cumulativeChartRef.current || cumulativeData.length === 0) {
+      console.log('cumulativeChartRef.current is null or no data');
+      return;
+    }
+
+    // 初始化图表实例
+    if (!cumulativeChartInstanceRef.current) {
+      console.log('Initializing Cumulative ECharts instance');
+      cumulativeChartInstanceRef.current = echarts.init(cumulativeChartRef.current);
+    }
+
+    // 准备数据
+    const labels = cumulativeData.map(item => item.label);
+    const values = cumulativeData.map(item => item.value);
+    
+    console.log('Cumulative chart data:', { labels, values, timeRange: cumulativeTimeRange });
+
+    // 配置选项
+    const option = {
+      backgroundColor: 'transparent',
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '15%',
+        top: '10%',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'category',
+        data: labels,
+        axisLine: {
+          lineStyle: {
+            color: 'rgba(0, 217, 255, 0.3)'
+          }
+        },
+        axisLabel: {
+          color: 'rgba(255, 255, 255, 0.7)',
+          fontSize: 11
+        }
+      },
+      yAxis: {
+        type: 'value',
+        axisLine: {
+          show: false
+        },
+        axisTick: {
+          show: false
+        },
+        axisLabel: {
+          color: 'rgba(255, 255, 255, 0.5)',
+          fontSize: 11
+        },
+        splitLine: {
+          lineStyle: {
+            color: 'rgba(0, 217, 255, 0.1)'
+          }
+        }
+      },
+      series: [
+        {
+          data: values,
+          type: 'line',
+          smooth: true,
+          lineStyle: {
+            color: '#00d9ff',
+            width: 2,
+            shadowColor: 'rgba(0, 217, 255, 0.3)',
+            shadowBlur: 10
+          },
+          itemStyle: {
+            color: '#00d9ff'
+          },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: 'rgba(0, 217, 255, 0.3)' },
+              { offset: 1, color: 'rgba(0, 136, 255, 0.1)' }
+            ])
+          },
+          emphasis: {
+            itemStyle: {
+              color: '#00d9ff',
+              borderColor: '#00d9ff',
+              borderWidth: 2,
+              shadowColor: 'rgba(0, 217, 255, 0.6)',
+              shadowBlur: 20
+            }
+          },
+          label: {
+            show: true,
+            position: 'top',
+            color: '#ffffff',
+            fontSize: 11,
+            fontWeight: 500
+          }
+        }
+      ]
+    };
+
+    cumulativeChartInstanceRef.current.setOption(option, true);
+    console.log('Cumulative chart option set successfully');
+
+    // 响应式处理
+    const handleResize = () => {
+      cumulativeChartInstanceRef.current?.resize();
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [cumulativeData, cumulativeTimeRange]);
 
   const loadStats = async () => {
     try {
@@ -108,224 +437,101 @@ const Home = () => {
 
   return (
     <div className="home-dashboard">
-      {/* Background Image */}
-      <img 
-        className="background-image" 
-        src="https://www.pphd.fun/screen/img/head.png" 
-        alt="background"
-      />
+      {/* Background Video */}
+      <video 
+        className="background-video" 
+        autoPlay 
+        loop 
+        muted 
+        playsInline
+      >
+        <source src="https://pphd.fun/screen/media/bg.mp4" type="video/mp4" />
+      </video>
       
-      {/* Breadcrumb */}
-      <div className="breadcrumb">
-        <span className="breadcrumb-item active">首页</span>
-      </div>
-
-      {/* Title */}
+      {/* Title with Header Image */}
       <div className="dashboard-title">
+        <img 
+          className="header-image" 
+          src="https://www.pphd.fun/screen/img/head.png" 
+          alt="header"
+        />
         <h1>数据分析驾驶舱</h1>
         <button className="fullscreen-btn">⛶</button>
       </div>
 
-      {/* Stats Cards - 月度统计 */}
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-label">本月订单数量</div>
-          <div className="stat-value">
-            {loading ? '加载中...' : stats.currentMonthCount.toLocaleString()}
+      {/* 内容区域 - 三列布局 */}
+      <div className="content-area">
+        {/* 左侧数据面板区域 */}
+        <div className="data-panel-section">
+          <div className="title-wrapper">
+            <img 
+              className="title-background" 
+              src="https://www.pphd.fun/screen/img/icon1.png" 
+              alt="icon"
+            />
+            <h2 className="section-title">订单系统分析</h2>
           </div>
-          <div className="stat-badge" title="本月累计订单总数">订单数 · 月</div>
-          <div className="stat-desc">权益卡订单总量统计</div>
+          
+          {/* 订单成交趋势 */}
+          <div className="chart-container">
+          <div className="chart-header">
+            <h3 className="chart-title">订单成交趋势</h3>
+            <div className="chart-controls">
+              <button 
+                className={`control-btn ${chartTimeRange === 'week' ? 'active' : ''}`}
+                onClick={() => setChartTimeRange('week')}
+              >
+                近7天
+              </button>
+              <button 
+                className={`control-btn ${chartTimeRange === 'year' ? 'active' : ''}`}
+                onClick={() => setChartTimeRange('year')}
+              >
+                近1年
+              </button>
+            </div>
+          </div>
+          
+          <div className="chart-content">
+            <div ref={chartRef} className="bar-chart"></div>
+          </div>
         </div>
-        <div className="stat-card">
-          <div className="stat-label">本月销售金额(元)</div>
-          <div className="stat-value">
-            {loading ? '加载中...' : formatAmount(stats.currentMonthSalesAmount)}
+
+          {/* 累积订单金额趋势 */}
+          <div className="chart-container">
+          <div className="chart-header">
+            <h3 className="chart-title">累积订单金额趋势</h3>
+            <div className="chart-controls">
+              <button 
+                className={`control-btn ${cumulativeTimeRange === 'week' ? 'active' : ''}`}
+                onClick={() => setCumulativeTimeRange('week')}
+              >
+                近7天
+              </button>
+              <button 
+                className={`control-btn ${cumulativeTimeRange === 'year' ? 'active' : ''}`}
+                onClick={() => setCumulativeTimeRange('year')}
+              >
+                近1年
+              </button>
+            </div>
           </div>
-          <div className="stat-badge" title="按售价统计的销售总额">销售额 · 月</div>
-          <div className="stat-desc">所有订单售价总和</div>
+          
+          <div className="chart-content">
+            <div ref={cumulativeChartRef} className="bar-chart"></div>
+          </div>
         </div>
-        <div className="stat-card">
-          <div className="stat-label">本月利润(元)</div>
-          <div className="stat-value">
-            {loading ? '加载中...' : formatAmount(stats.currentMonthProfit)}
-          </div>
-          <div className="stat-badge" title="销售额减去进货成本">利润 · 月</div>
-          <div className="stat-desc">
-            {stats.currentMonthSalesAmount > 0 
-              ? `利润率 ${((stats.currentMonthProfit / stats.currentMonthSalesAmount) * 100).toFixed(1)}%`
-              : '暂无数据'}
-          </div>
         </div>
-        <div className="stat-card">
-          <div className="stat-label">待发货数量</div>
-          <div className="stat-value">
-            {loading ? '加载中...' : stats.currentMonthPendingCount.toLocaleString()}
-          </div>
-          <div className="stat-badge" title="未出库的订单数量">库存 · 月</div>
-          <div className="stat-desc">
-            {stats.currentMonthCount > 0 
-              ? `待发率 ${((stats.currentMonthPendingCount / stats.currentMonthCount) * 100).toFixed(1)}%`
-              : '暂无数据'}
-          </div>
+        
+        {/* 中间区域 - 预留 */}
+        <div className="middle-section">
+        </div>
+        
+        {/* 右侧区域 - 预留 */}
+        <div className="right-section">
         </div>
       </div>
 
-      {/* Main Content Grid */}
-      <div className="content-grid">
-        {/* Left Column - Charts */}
-        <div className="left-column">
-          <div className="chart-panel">
-            <div className="panel-header">
-              <h3>订单统计分析</h3>
-              <div className="chart-controls">
-                <div className="chart-tabs">
-                  <button 
-                    className={`tab ${chartTimeRange === 'month' ? 'active' : ''}`}
-                    onClick={() => handleChartTimeRangeChange('month')}
-                  >
-                    本月
-                  </button>
-                  <button 
-                    className={`tab ${chartTimeRange === 'year' ? 'active' : ''}`}
-                    onClick={() => handleChartTimeRangeChange('year')}
-                  >
-                    本年
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="chart-content">
-              <div className="chart-title">订单成交趋势</div>
-              {chartLoading ? (
-                <div className="chart-loading">加载中...</div>
-              ) : chartData.length === 0 ? (
-                <div className="chart-empty">暂无数据</div>
-              ) : (
-                <div className="chart-placeholder">
-                  <div className="chart-bars">
-                    {chartData.map((item, i) => {
-                      const maxCount = Math.max(...chartData.map(d => d.orderCount), 1);
-                      const height = (item.orderCount / maxCount) * 100;
-                      return (
-                        <div key={i} className="bar" style={{ height: `${height}px` }}>
-                          <div className="bar-fill" title={`${item.date}: ${item.orderCount} 单`}></div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div className="chart-axis">
-                    {chartData.map((item, i) => (
-                      <span key={i}>{item.date.substring(5)}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="chart-panel">
-            <div className="panel-header">
-              <h3>订单金额趋势</h3>
-              <div className="chart-controls">
-                <div className="chart-tabs">
-                  <button 
-                    className={`tab ${chartTimeRange === 'month' ? 'active' : ''}`}
-                    onClick={() => handleChartTimeRangeChange('month')}
-                  >
-                    本月
-                  </button>
-                  <button 
-                    className={`tab ${chartTimeRange === 'year' ? 'active' : ''}`}
-                    onClick={() => handleChartTimeRangeChange('year')}
-                  >
-                    本年
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="chart-content">
-              {chartLoading ? (
-                <div className="chart-loading">加载中...</div>
-              ) : chartData.length === 0 ? (
-                <div className="chart-empty">暂无数据</div>
-              ) : (
-                <div className="chart-placeholder">
-                  <div className="amount-chart">
-                    {chartData.map((item, i) => {
-                      const maxAmount = Math.max(...chartData.map(d => d.salesAmount), 1);
-                      const height = (item.salesAmount / maxAmount) * 120;
-                      const profitRate = item.salesAmount > 0 
-                        ? ((item.profit / item.salesAmount) * 100).toFixed(1) 
-                        : 0;
-                      return (
-                        <div key={i} className="amount-bar">
-                          <div 
-                            className="amount-fill" 
-                            style={{ height: `${height}px` }}
-                            title={`${item.date}\n销售额: ¥${item.salesAmount.toFixed(2)}\n利润: ¥${item.profit.toFixed(2)}\n利润率: ${profitRate}%`}
-                          >
-                            <span className="amount-value">¥{(item.salesAmount / 1000).toFixed(1)}k</span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div className="chart-axis">
-                    {chartData.map((item, i) => (
-                      <span key={i}>{item.date.substring(5)}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="rank-panel">
-            <div className="panel-header">
-              <h3>商品卡类交付排行</h3>
-              <div className="rank-controls">
-                <button className="rank-tab">累计</button>
-              </div>
-            </div>
-            <div className="rank-list">
-              {rankLoading ? (
-                <div className="chart-loading">加载中...</div>
-              ) : rankData.length === 0 ? (
-                <div className="empty-state">暂无交付数据</div>
-              ) : (
-                rankData.map((item) => {
-                  const maxValue = rankData[0]?.deliveryCount || 1;
-                  return (
-                    <div key={item.rank} className="rank-item">
-                      <span className="rank-number">{item.rank}</span>
-                      <span className="rank-name">{item.productName}</span>
-                      <div className="rank-bar">
-                        <div className="rank-fill" style={{ width: `${(item.deliveryCount / maxValue) * 100}%` }}></div>
-                      </div>
-                      <span className="rank-value">{item.deliveryCount}</span>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column - 3D Map Visualization */}
-        <div className="right-column">
-          <div className="map-panel">
-            <div className="map-container">
-              {/* 3D Map Placeholder - This would be a real 3D visualization in production */}
-              <div className="map-background"></div>
-              <div className="map-overlay">
-                <div className="data-point" style={{ top: '30%', left: '40%' }}></div>
-                <div className="data-point" style={{ top: '50%', left: '60%' }}></div>
-                <div className="data-point" style={{ top: '70%', left: '35%' }}></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
