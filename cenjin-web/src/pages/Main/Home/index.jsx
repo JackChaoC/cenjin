@@ -681,19 +681,19 @@ const Home = () => {
           <div className="right-section-top">
               <div className="right-section-top-item">
                 <p className='p1'>本年购买订单</p>
-                <p className='p2'>10000</p>
+                <p className='p2'>18,987</p>
               </div>
               <div className="right-section-top-item">
-                <p className='p1'>本年购买订单</p>
-                <p className='p2'>10000</p>
+                <p className='p1'>本年购买金额</p>
+                <p className='p2'>6,268,162.70</p>
               </div>
               <div className="right-section-top-item">
-                <p className='p1'>本年购买订单</p>
-                <p className='p2'>10000</p>
+                <p className='p1'>本年购买订单数量</p>
+                <p className='p2'>18,987</p>
               </div>
               <div className="right-section-top-item">
-                <p className='p1'>本年购买订单</p>
-                <p className='p2'>10000</p>
+                <p className='p1'>本年销售金额</p>
+                <p className='p2'>5,995,102</p>
               </div>
           </div>
         </div>
