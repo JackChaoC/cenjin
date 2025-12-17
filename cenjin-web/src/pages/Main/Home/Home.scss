@@ -95,12 +95,12 @@ $gradient-text-bg: linear-gradient(180deg, #fff 1%, #7abeff);
   .header-image {
     position: absolute;
     min-width: 1000px;
-    max-width: 1800px;
+    max-width: 2000px;
     object-fit: fill;
     z-index: 1;
     top: 0;
     left: 50%;
-    transform: translate(-50%, -15%) scaleY(0.8);
+    transform: translate(-50%, -15%) scaleY(0.7);
   }
 
   h1 {

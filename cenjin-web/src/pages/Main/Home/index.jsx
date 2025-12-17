@@ -8,6 +8,7 @@ const Home = () => {
   const chartInstanceRef = useRef(null);
   const cumulativeChartRef = useRef(null);
   const cumulativeChartInstanceRef = useRef(null);
+  const dashboardRef = useRef(null);
   
   const [stats, setStats] = useState({
     // 月度数据
@@ -40,6 +41,9 @@ const Home = () => {
   const [rankYear, setRankYear] = useState('2025'); // 排行榜选择的年份
   const rankListRef = useRef(null);
   const [rankScrollPosition, setRankScrollPosition] = useState(0);
+
+  // 全屏状态
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // 加载统计数据
   useEffect(() => {
@@ -478,13 +482,46 @@ const Home = () => {
     setChartTimeRange(range);
   };
 
+  // 全屏切换
+  const toggleFullscreen = () => {
+    if (!dashboardRef.current) return;
+
+    if (!document.fullscreenElement) {
+      // 进入全屏
+      dashboardRef.current.requestFullscreen().then(() => {
+        setIsFullscreen(true);
+      }).catch(err => {
+        console.error('进入全屏失败:', err);
+      });
+    } else {
+      // 退出全屏
+      document.exitFullscreen().then(() => {
+        setIsFullscreen(false);
+      }).catch(err => {
+        console.error('退出全屏失败:', err);
+      });
+    }
+  };
+
+  // 监听全屏状态变化
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
   // 格式化金额
   const formatAmount = (amount) => {
     return amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   };
 
   return (
-    <div className="home-dashboard">
+    <div className="home-dashboard" ref={dashboardRef}>
       {/* Background Video */}
       <video 
         className="background-video" 
@@ -504,7 +541,9 @@ const Home = () => {
           alt="header"
         />
         <h1>数据分析驾驶舱</h1>
-        <button className="fullscreen-btn">⛶</button>
+        <button className="fullscreen-btn" onClick={toggleFullscreen}>
+          {isFullscreen ? '⛶' : '⛶'}
+        </button>
       </div>
 
       {/* 内容区域 - 三列布局 */}
