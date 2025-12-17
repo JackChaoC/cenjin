@@ -37,6 +37,9 @@ const Home = () => {
   // 排行榜数据状态
   const [rankData, setRankData] = useState([]);
   const [rankLoading, setRankLoading] = useState(true);
+  const [rankYear, setRankYear] = useState('2025'); // 排行榜选择的年份
+  const rankListRef = useRef(null);
+  const [rankScrollPosition, setRankScrollPosition] = useState(0);
 
   // 加载统计数据
   useEffect(() => {
@@ -410,19 +413,64 @@ const Home = () => {
     try {
       setRankLoading(true);
       console.log('开始加载排行榜数据...');
-      const response = await getRankData();
-      console.log('排行榜 API 响应:', response);
-      if (response.success) {
-        console.log('排行榜数据:', response.data);
-        setRankData(response.data || []);
-      } else {
-        console.error('排行榜 API 返回失败:', response);
-      }
+      const response = await fetch('/RankData/index.json');
+      const data = await response.json();
+      console.log('排行榜数据加载成功:', data);
+      setRankData(data);
     } catch (error) {
       console.error('加载排行数据失败:', error);
     } finally {
       setRankLoading(false);
     }
+  };
+
+  // 排行榜滚动效果
+  useEffect(() => {
+    if (!rankListRef.current || rankLoading || !rankData.categories) return;
+
+    const scrollInterval = setInterval(() => {
+      setRankScrollPosition(prev => {
+        const container = rankListRef.current;
+        if (!container) return prev;
+        
+        const newPosition = prev + 1;
+        const itemCount = getCurrentRankData().length;
+        const itemHeight = 52; // 每个item高度约为 padding(10*2) + height(30) + gap(12) ≈ 52px
+        const halfScrollHeight = itemCount * itemHeight;
+        
+        // 当滚动到一半位置时（第一组数据完全滚出），重置到开始
+        if (newPosition >= halfScrollHeight) {
+          return 0;
+        }
+        return newPosition;
+      });
+    }, 30); // 每30ms滚动1px，更流畅
+
+    return () => clearInterval(scrollInterval);
+  }, [rankLoading, rankData, rankYear]);
+
+  // 切换年份时重置滚动位置
+  useEffect(() => {
+    setRankScrollPosition(0);
+  }, [rankYear]);
+
+  // 应用滚动位置
+  useEffect(() => {
+    if (rankListRef.current) {
+      rankListRef.current.scrollTop = rankScrollPosition;
+    }
+  }, [rankScrollPosition]);
+
+  // 获取当前年份的排行榜数据
+  const getCurrentRankData = () => {
+    if (!rankData.categories) return [];
+    
+    return rankData.categories
+      .map(category => ({
+        name: category.name,
+        value: category.data[rankYear] || 0
+      }))
+      .sort((a, b) => b.value - a.value); // 按值降序排列
   };
 
   // 切换图表时间范围
@@ -521,15 +569,96 @@ const Home = () => {
             <div ref={cumulativeChartRef} className="bar-chart"></div>
           </div>
         </div>
+
+          {/* 商品卡成交订单排行 */}
+          <div className="chart-container rank-container">
+            <div className="chart-header">
+              <h3 className="chart-title">商品卡成交订单排行</h3>
+              <div className="chart-controls">
+                <select 
+                  className="year-selector"
+                  value={rankYear}
+                  onChange={(e) => setRankYear(e.target.value)}
+                >
+                  {rankData.years && rankData.years.map(year => (
+                    <option key={year} value={year}>
+                      {year}年
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            
+            <div className="rank-content" ref={rankListRef}>
+              {rankLoading ? (
+                <div className="rank-loading">加载中...</div>
+              ) : (
+                <div className="rank-list">
+                  {getCurrentRankData().map((item, index) => {
+                    const maxValue = getCurrentRankData()[0]?.value || 1;
+                    const percentage = (item.value / maxValue) * 100;
+                    
+                    return (
+                      <div key={index} className="rank-item">
+                        <div className="rank-number">{index + 1}</div>
+                        <div className="rank-name">{item.name}</div>
+                        <div className="rank-bar">
+                          <div 
+                            className="rank-fill" 
+                            style={{ width: `${percentage}%` }}
+                          ></div>
+                        </div>
+                        <div className="rank-value">{item.value}</div>
+                      </div>
+                    );
+                  })}
+                  {/* 复制一份数据用于无缝循环 */}
+                  {getCurrentRankData().map((item, index) => {
+                    const maxValue = getCurrentRankData()[0]?.value || 1;
+                    const percentage = (item.value / maxValue) * 100;
+                    
+                    return (
+                      <div key={`duplicate-${index}`} className="rank-item">
+                        <div className="rank-number">{index + 1}</div>
+                        <div className="rank-name">{item.name}</div>
+                        <div className="rank-bar">
+                          <div 
+                            className="rank-fill" 
+                            style={{ width: `${percentage}%` }}
+                          ></div>
+                        </div>
+                        <div className="rank-value">{item.value}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-        
-        {/* 中间区域 - 预留 */}
-        <div className="middle-section">
-        </div>
-        
-        {/* 右侧区域 - 预留 */}
+
+        {/* 右边区域 - 占3格 */}
         <div className="right-section">
+          <div className="right-section-top">
+              <div className="right-section-top-item">
+                <p>本年购买订单</p>
+                <p>10000</p>
+              </div>
+              <div className="right-section-top-item">
+                <p>本年购买订单</p>
+                <p>10000</p>
+              </div>
+              <div className="right-section-top-item">
+                <p>本年购买订单</p>
+                <p>10000</p>
+              </div>
+              <div className="right-section-top-item">
+                <p>本年购买订单</p>
+                <p>10000</p>
+              </div>
+          </div>
         </div>
+
       </div>
 
     </div>

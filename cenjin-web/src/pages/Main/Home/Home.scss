@@ -20,25 +20,25 @@ $gradient-text-bg: linear-gradient(180deg, #fff 1%, #7abeff);
   position: relative;
   font-family: 'YSBT', sans-serif;
   padding: 0; // 移除所有padding
-  
+
   // 自定义滚动条样式
   &::-webkit-scrollbar {
     width: 6px; // 很细的滚动条
   }
-  
+
   &::-webkit-scrollbar-track {
     background: transparent; // 透明背景
   }
-  
+
   &::-webkit-scrollbar-thumb {
     background: rgba(128, 128, 128, 0.5); // 半透明灰色
     border-radius: 3px;
-    
+
     &:hover {
       background: rgba(128, 128, 128, 0.7); // 悬停时更明显
     }
   }
-  
+
   .background-video {
     position: fixed;
     top: 60px; // 考虑 header 的高度
@@ -49,13 +49,13 @@ $gradient-text-bg: linear-gradient(180deg, #fff 1%, #7abeff);
     z-index: 0;
     opacity: 1;
   }
-  
+
   // 确保所有内容在视频之上
-  > * {
+  >* {
     position: relative;
     z-index: 1;
   }
-  
+
   .breadcrumb {
     display: flex;
     align-items: center;
@@ -64,16 +64,16 @@ $gradient-text-bg: linear-gradient(180deg, #fff 1%, #7abeff);
     padding: 12px 20px;
     border-bottom: 1px solid rgba(0, 217, 255, 0.2);
     font-size: 14px;
-    
+
     .breadcrumb-item {
       color: #00d9ff;
       transition: color 0.3s;
-      
+
       &.active {
         font-weight: 500;
       }
     }
-    
+
     .breadcrumb-separator {
       color: rgba(0, 217, 255, 0.5);
       font-size: 14px;
@@ -88,18 +88,19 @@ $gradient-text-bg: linear-gradient(180deg, #fff 1%, #7abeff);
   align-items: center;
   justify-content: center;
   position: relative;
-  min-height: 100px;
+  min-height: 80px;
   padding: 0;
   width: 100%;
 
   .header-image {
     position: absolute;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
+    min-width: 1000px;
+    max-width: 1800px;
+    object-fit: fill;
     z-index: 1;
     top: 0;
-    left: 0;
+    left: 50%;
+    transform: translate(-50%, -15%) scaleY(0.8);
   }
 
   h1 {
@@ -112,7 +113,7 @@ $gradient-text-bg: linear-gradient(180deg, #fff 1%, #7abeff);
     bottom: 10px;
     font-style: italic;
     letter-spacing: 0.15em;
-    text-shadow: 
+    text-shadow:
       0 0 10px rgba(0, 217, 255, 0.8),
       0 0 20px rgba(0, 217, 255, 0.6),
       0 0 30px rgba(0, 136, 255, 0.4),
@@ -142,7 +143,7 @@ $gradient-text-bg: linear-gradient(180deg, #fff 1%, #7abeff);
 // 内容区域 - 四列布局
 .content-area {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr; // 四等分
+  grid-template-columns: 1fr 3fr; // 四等分
   gap: 20px;
   padding: 0px 30px;
   min-height: calc(100vh - 100px);
@@ -151,11 +152,11 @@ $gradient-text-bg: linear-gradient(180deg, #fff 1%, #7abeff);
 // 数据面板区域（左侧）
 .data-panel-section {
   position: relative;
-  
+
   .title-wrapper {
     position: relative;
     padding: 15px 10px 15px 30px;
-    
+
     .title-background {
       position: absolute;
       left: 0;
@@ -166,11 +167,11 @@ $gradient-text-bg: linear-gradient(180deg, #fff 1%, #7abeff);
       object-fit: contain;
       z-index: 0;
     }
-    
+
     .section-title {
       font-size: 16px;
       margin: 0;
-      font-weight: 500;
+      font-weight: 600;
       letter-spacing: 0.1em;
       text-align: left;
       line-height: 34px;
@@ -181,72 +182,125 @@ $gradient-text-bg: linear-gradient(180deg, #fff 1%, #7abeff);
   }
 }
 
-// 中间区域
-.middle-section {
-  min-height: 100px; // 预留给后续内容
-}
 
-// 右侧区域
-.right-section {
-  min-height: 100px; // 预留给后续内容
-}
 
 // 图表容器
 .chart-container {
   background: rgba(10, 20, 40, 0.7);
-  border: 1px solid rgba(0, 217, 255, 0.3);
   border-radius: 12px;
-  padding: 20px;
-  backdrop-filter: blur(10px);
   width: 100%;
-  
+
   .chart-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
-    
+    background-image: url('https://www.pphd.fun/screen/img/icon2.png');
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    background-size: 100% 50%;
+    padding: 15px 10px;
+    height: 30px;
+
     .chart-title {
-      font-size: 18px;
-      color: #00d9ff;
+      font-size: 14px;
       margin: 0;
       font-weight: 500;
+      padding-left: 20px;
+      line-height: 34px;
+      @include gradient-text;
     }
-    
+
     .chart-controls {
       display: flex;
-      gap: 10px;
-      
+      gap: 5px;
+
       .control-btn {
-        padding: 6px 16px;
+        height: 20px;
+        width: 40px;
+        line-height: 20px;
         background: rgba(0, 217, 255, 0.1);
         border: 1px solid rgba(0, 217, 255, 0.3);
         color: rgba(255, 255, 255, 0.7);
         border-radius: 6px;
         cursor: pointer;
         transition: all 0.3s;
-        font-size: 13px;
-        
+        font-size: 10px;
+        white-space: nowrap;
+
         &:hover {
           background: rgba(0, 217, 255, 0.2);
           color: #ffffff;
         }
-        
+
         &.active {
           background: rgba(0, 217, 255, 0.3);
           border-color: #00d9ff;
           color: #00d9ff;
         }
       }
+
+      .year-selector {
+        height: 20px;
+        padding: 0 10px;
+        background: rgba(0, 217, 255, 0.1);
+        border: 1px solid rgba(0, 217, 255, 0.3);
+        color: #fff;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 10px;
+        outline: none;
+        transition: all 0.3s;
+
+        &:hover {
+          background: rgba(0, 217, 255, 0.2);
+          border-color: #00d9ff;
+        }
+
+        &:focus {
+          background: rgba(0, 217, 255, 0.3);
+          border-color: #00d9ff;
+        }
+
+        option {
+          background: #0a0e27;
+          color: #fff;
+          padding: 6px;
+        }
+      }
     }
   }
-  
+
   .chart-content {
     position: relative;
-    
+
     .bar-chart {
       width: 100%;
       height: 250px;
+    }
+  }
+}
+
+// 排行榜容器
+.rank-container {
+  .rank-content {
+    height: 300px;
+    overflow: hidden;
+    position: relative;
+    padding: 10px;
+
+    .rank-loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .rank-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
   }
 }
@@ -482,12 +536,10 @@ $gradient-text-bg: linear-gradient(180deg, #fff 1%, #7abeff);
   }
 
   .area-chart {
-    background: linear-gradient(
-      180deg,
-      rgba(0, 217, 255, 0.2) 0%,
-      rgba(0, 217, 255, 0.05) 50%,
-      transparent 100%
-    );
+    background: linear-gradient(180deg,
+        rgba(0, 217, 255, 0.2) 0%,
+        rgba(0, 217, 255, 0.05) 50%,
+        transparent 100%);
     border-radius: 8px;
   }
 }
@@ -515,6 +567,7 @@ $gradient-text-bg: linear-gradient(180deg, #fff 1%, #7abeff);
   .rank-number {
     width: 30px;
     height: 30px;
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -522,34 +575,42 @@ $gradient-text-bg: linear-gradient(180deg, #fff 1%, #7abeff);
     border-radius: 4px;
     color: #00d9ff;
     font-weight: 600;
-  }
-
-  .rank-name {
-    flex: 0 0 150px;
-    color: rgba(255, 255, 255, 0.8);
     font-size: 14px;
   }
 
-  .rank-bar {
-    flex: 1;
-    height: 8px;
-    background: rgba(0, 217, 255, 0.1);
-    border-radius: 4px;
+  .rank-name {
+    width: 70px;
+    flex-shrink: 0;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 12px;
+    white-space: nowrap;
     overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .rank-bar {
+    width: 80px;
+    height: 6px;
+    background: rgba(0, 217, 255, 0.1);
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
 
     .rank-fill {
       height: 100%;
       background: linear-gradient(90deg, #00d9ff, #0064ff);
-      border-radius: 4px;
-      transition: width 0.3s ease;
+      border-radius: 5px;
+      transition: width 0.5s ease;
     }
   }
 
   .rank-value {
-    flex: 0 0 60px;
+    flex: 1;
+    flex-shrink: 0;
     text-align: right;
     color: #00d9ff;
     font-weight: 600;
+    font-size: 14px;
   }
 }
 
@@ -579,11 +640,9 @@ $gradient-text-bg: linear-gradient(180deg, #fff 1%, #7abeff);
       .map-background {
         width: 100%;
         height: 100%;
-        background: radial-gradient(
-          circle at center,
-          rgba(0, 100, 255, 0.1) 0%,
-          transparent 70%
-        );
+        background: radial-gradient(circle at center,
+            rgba(0, 100, 255, 0.1) 0%,
+            transparent 70%);
       }
 
       .map-overlay {
@@ -621,10 +680,12 @@ $gradient-text-bg: linear-gradient(180deg, #fff 1%, #7abeff);
 }
 
 @keyframes pulse {
+
   0%,
   100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
@@ -636,6 +697,7 @@ $gradient-text-bg: linear-gradient(180deg, #fff 1%, #7abeff);
     height: 24px;
     opacity: 1;
   }
+
   100% {
     width: 60px;
     height: 60px;
