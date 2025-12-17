@@ -43,8 +43,8 @@ $gradient-text-bg: linear-gradient(180deg, #fff 1%, #7abeff);
     position: fixed;
     top: 60px; // 考虑 header 的高度
     left: 200px; // 考虑 sidebar 的宽度
-    width: calc(100% - 200px);
-    height: calc(100% - 60px);
+    width: calc(100% + 200px);
+    height: calc(100% + 60px);
     object-fit: cover;
     z-index: 0;
     opacity: 1;
@@ -182,7 +182,37 @@ $gradient-text-bg: linear-gradient(180deg, #fff 1%, #7abeff);
   }
 }
 
-
+.right-section{
+  padding-top: 15px;
+  .right-section-top{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+  } 
+  .right-section-top-item {
+    width: 100px;
+    height: 120px;
+    margin-bottom: 20px;
+    background-image: url('https://www.pphd.fun/screen/img/icon8.png');
+    background-size: 100% 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: right;
+     text-align: center;
+    .p1{
+      font-size: 12px;
+      color: #e4e4e4;
+      margin-top: 4px;
+    }
+    .p2{
+      font-size: 16px;
+      margin-top: 33px;
+      transform: scaleY(1.5);
+      font-style: italic;
+      font-weight: 400;
+    }
+  }
+}
 
 // 图表容器
 .chart-container {
