@@ -3,19 +3,20 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# 【修改】全面拥抱 NPM，复制 package-lock.json 而不是 yarn.lock
-COPY package.json package-lock.json ./
+# 复制 Yarn 的依赖描述文件
+COPY package.json yarn.lock ./
 
-# 安装全部依赖（包含 devDependencies，用于 build）
-RUN npm ci
+# 【修改】严格按照 yarn.lock 安装全部依赖（包含开发依赖，用于跑 build）
+RUN yarn --frozen-lockfile
 
-# 复制源码并打包
+# 复制源码
 COPY . .
-RUN npm run build
 
-# 【修改】使用 npm prune 代替 yarn install --production
-# 它会自动帮你删掉 node_modules 里的 devDependencies，只留下生产依赖，极为优雅且安全
-RUN npm prune --production
+# 执行你刚刚加上的 build 脚本（会打印一条提示并成功退出）
+RUN yarn build
+
+# 【修改】斩断开发依赖！只留下生产环境必需的包（实现镜像瘦身）
+RUN yarn install --production --frozen-lockfile --ignore-scripts
 
 # === 阶段 2: 最终运行镜像 ===
 FROM node:20-alpine AS runner
@@ -25,12 +26,11 @@ WORKDIR /app
 # 设置为生产环境环境变量
 ENV NODE_ENV=production
 
-# 从 builder 复制生产依赖和打包产物
+# 【修改】从 builder 复制精简后的生产依赖和所有源码文件
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/dist ./dist
-COPY package.json ./
+COPY --from=builder /app ./
 
 EXPOSE 3000
 
-# 【修改】启动命令改为 npm start
-CMD ["npm", "start"]
+# 【修改】启动命令改回 yarn start
+CMD ["yarn", "start"]

@@ -48,7 +48,7 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-    command: sh -c "yarn db:migrate && yarn dev"
+    command: sh -c "yarn db:migrate && node dist/src/index.js"
 
   # Vite 前端服务
   frontend:

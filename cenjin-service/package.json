@@ -4,6 +4,7 @@
   "main": "src/index.js",
   "license": "MIT",
   "scripts": {
+    "build": "rm -rf dist && mkdir -p dist && cp -R src dist/src && cp -R config dist/config && cp -R migrations dist/migrations && cp -R models dist/models && cp -R seeders dist/seeders && cp -R public dist/public",
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "db:migrate": "sequelize-cli db:migrate",
