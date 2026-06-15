@@ -29,7 +29,37 @@
       "month": "2025-11",
       "total": 969264.00,
       "file": "/OrderData/2025-11.json"
+    },
+    {
+      "month": "2025-12",
+      "total": 1277800.00,
+      "file": "/OrderData/2025-12.json"
+    },
+    {
+      "month": "2026-01",
+      "total": 896106.72,
+      "file": "/OrderData/2026-01.json"
+    },
+    {
+      "month": "2026-02",
+      "total": 772495.82,
+      "file": "/OrderData/2026-02.json"
+    },
+    {
+      "month": "2026-03",
+      "total": 1160642.75,
+      "file": "/OrderData/2026-03.json"
+    },
+    {
+      "month": "2026-04",
+      "total": 1099222.47,
+      "file": "/OrderData/2026-04.json"
+    },
+    {
+      "month": "2026-05",
+      "total": 1333997.66,
+      "file": "/OrderData/2026-05.json"
     }
   ],
-  "yearTotal": 6268162.70
+  "yearTotal": 12808428.12
 }

@@ -40,9 +40,6 @@ services:
       DB_NAME: cenjin_db
       DB_USER: root
       DB_PASSWORD: root
-    volumes:
-      - ./cenjin-service:/app
-      - backend_node_modules:/app/node_modules  # 命名卷，持久化
     networks:
       - cenjin_network
     depends_on:

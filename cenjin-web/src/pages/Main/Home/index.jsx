@@ -38,7 +38,7 @@ const Home = () => {
   // 排行榜数据状态
   const [rankData, setRankData] = useState([]);
   const [rankLoading, setRankLoading] = useState(true);
-  const [rankYear, setRankYear] = useState('2025'); // 排行榜选择的年份
+  const [rankYear, setRankYear] = useState('2026'); // 排行榜选择的年份
   const rankListRef = useRef(null);
   const [rankScrollPosition, setRankScrollPosition] = useState(0);
 
@@ -86,7 +86,7 @@ const Home = () => {
     try {
       if (chartTimeRange === 'week') {
         // 获取最近7天的数据（从11月最后7天）
-        const response = await fetch('/OrderData/2025-11.json');
+        const response = await fetch('/OrderData/2026-05.json');
         const monthData = await response.json();
         const last7Days = monthData.dailyData.slice(-7);
         setChartData(last7Days.map(item => ({
@@ -115,7 +115,7 @@ const Home = () => {
     try {
       if (cumulativeTimeRange === 'week') {
         // 获取最近7天的数据并计算累积
-        const response = await fetch('/OrderData/2025-11.json');
+        const response = await fetch('/OrderData/2026-05.json');
         const monthData = await response.json();
         const last7Days = monthData.dailyData.slice(-7);
         
